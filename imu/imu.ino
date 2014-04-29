@@ -12,25 +12,28 @@ void getData();
 void getAngle();
 void getAzimuth();
 
-MPU6050 accelgyro(0x69);
-HMC5883L mag;
+MPU6050 accelgyro; // LEFT FOOT
+MPU6050 accelgyro1(0x69); // RIGHT FOOT
 
 int16_t ax, ay, az;
 int16_t gx, gy, gz;
-int16_t mx, my, mz;
-int16_t mxMax=763, myMax=336, mzMax=375;
-int16_t mxMin=-437, myMin=-715, mzMin=-573;
+int16_t axL, ayL, azL;
+int16_t gxL, gyL, gzL;
+int16_t axR, ayR, azR;
+int16_t gxR, gyR, gzR;
 
-float mxMap, myMap, mzMap;
-
-int16_t axOff, ayOff, azOff;
-int16_t gxOff, gyOff, gzOff;
+int16_t axOffR, ayOffR, azOffR;
+int16_t gxOffR, gyOffR, gzOffR;
+int16_t axOffL, ayOffL, azOffL;
+int16_t gxOffL, gyOffL, gzOffL;
 int16_t mxOff, myOff, mzOff;
 
 boolean  flag=1;
 
-float Ax, Ay, Az;
-float Gx, Gy, Gz;
+float AxR, AyR, AzR;
+float GxR, GyR, GzR;
+float AxL, AyL, AzL;
+float GxL, GyL, GzL;
 float angle_z;
 float prev_angle_z;
 float fAngle_z;
@@ -68,148 +71,150 @@ void setup() {
   // join I2C bus (I2Cdev library doesn't do this automatically)
   Wire.begin();
   // initialize serial communication
-  Serial.begin(115200);
-
+  Serial.begin(57600);
   flag=1;
   // initialize device
   accelgyro.initialize();
   // verify connection
-  mag.initialize();
-
-  getOffset();
+  getOffsetR();
+  getOffsetL();
 }
 void loop() {
   getAngle();
-}
-
-void getOffset() {
-  for(int i=0; i<20; i++)
-  {
-    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-    mag.getHeading(&mx, &my, &mz);
-    axOff+=ax;
-    ayOff+=ay;
-    azOff+=az;
-    gxOff+=gx;
-    gyOff+=gy;
-    gzOff+=gz;
-  }
-
-  gxOff/=20;
-  gyOff/=20;
-  gzOff/=20;
-  axOff/=20;
-  ayOff/=20;
-  azOff/=20;
-  // Magnetometer offset.
-
-  mxOff  =  (mxMax+mxMin)/2;
-  myOff  =  (myMax+myMin)/2;
-  mzOff  =  (mzMax+mzMin)/2;
-}
-
-void getData() {
-  mag.getHeading(&mx, &my, &mz);
-  mx = mx - mxOff;
-  my = my - myOff;
-  mz = mz - mzOff;
-
-  accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-  Gx=((gx-gxOff)/16.40);
-  Gy=((gy-gyOff)/16.40);
-  Gz=((gz-gzOff)/16.40);
-  Ax=((ax-axOff)/2048.00);
-  Ay=((ay-ayOff)/2048.00);
-  Az=((az-azOff)/2048.00)+1;	// Az=Ay;	Ay=Az
-  unsigned int time=millis();
-  Serial.print(time);
-  Serial.print("\t");
-  Serial.print(Ax);
-  Serial.print("\t");
-  Serial.print(Ay);
-  Serial.print("\t");
-  Serial.print(Az);
-  Serial.print("\t");
-  Serial.print(Gx);
-  Serial.print("\t");
-  Serial.print(Gy);
-  Serial.print("\t");
-  Serial.print(Gz);
-  Serial.print("\t");
   delay(10);
 }
 
+void getOffsetR() {
+  for(int i=0; i<20; i++)
+  {
+    accelgyro1.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    axOffR+=ax;
+    ayOffR+=ay;
+    azOffR+=az;
+    gxOffR+=gx;
+    gyOffR+=gy;
+    gzOffR+=gz;
+  }
+
+  gxOffR/=20;
+  gyOffR/=20;
+  gzOffR/=20;
+  axOffR/=20;
+  ayOffR/=20;
+  azOffR/=20;
+}
+void getOffsetL() {
+  for(int i=0; i<20; i++)
+  {
+    accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    axOffL+=ax;
+    ayOffL+=ay;
+    azOffL+=az;
+    gxOffL+=gx;
+    gyOffL+=gy;
+    gzOffL+=gz;
+  }
+
+  gxOffL/=20;
+  gyOffL/=20;
+  gzOffL/=20;
+  axOffL/=20;
+  ayOffL/=20;
+  azOffL/=20;
+}
+
+void getDataL() {
+ accelgyro.getMotion6(&axL, &ayL, &azL, &gxL, &gyL, &gzL); // Left
+  // LEFT
+  GxL=((gx-gxOffL)/16.40);
+  GyL=((gy-gyOffL)/16.40);
+  GzL=((gz-gzOffL)/16.40);
+  AxL=((ax-axOffL)/2048.00);
+  AyL=((ay-ayOffL)/2048.00);
+  AzL=((az-azOffL)/2048.00)+1;	// Az=Ay;	Ay=Az
+  unsigned int time=millis();
+  Serial.print("L");
+  Serial.print("\t");
+  Serial.print(time);
+  Serial.print("\t");
+  Serial.print(AxL);
+  Serial.print("\t");
+  Serial.print(AyL);
+  Serial.print("\t");
+  Serial.print(AzL);
+  Serial.print("\t");
+  Serial.print(GxL);
+  Serial.print("\t");
+  Serial.print(GyL);
+  Serial.print("\t");
+  Serial.print(GzL);
+  Serial.print("\t"); 
+}
+  
+  void getDataR() {
+  accelgyro1.getMotion6(&axR, &ayR, &azR, &gxR, &gyR, &gzR);  // Right
+  // RIGHT
+  GxR=((gx-gxOffR)/16.40);
+  GyR=((gy-gyOffR)/16.40);
+  GzR=((gz-gzOffR)/16.40);
+  AxR=((ax-axOffR)/2048.00);
+  AyR=((ay-ayOffR)/2048.00);
+  AzR=((az-azOffR)/2048.00)+1;	// Az=Ay;	Ay=Az
+  unsigned int time=millis();
+  Serial.print("R");
+  Serial.print("\t");
+  Serial.print(time);
+  Serial.print("\t");
+  Serial.print(AxR);
+  Serial.print("\t");
+  Serial.print(AyR);
+  Serial.print("\t");
+  Serial.print(AzR);
+  Serial.print("\t");
+  Serial.print(GxR);
+  Serial.print("\t");
+  Serial.print(GyR);
+  Serial.print("\t");
+  Serial.print(GzR);
+  Serial.print("\t");
+}
+
 void getAngle() {
-  getData();
+  getDataR();
   dt  =  millis()-dt;
-  accAngle_x  =  atan2(Ax,  sqrt(Ay*Ay  +  Az*Az))*180/PI;
-  accAngle_y  =  atan2(Ay,  sqrt(Ax*Ax  +  Az*Az))*180/PI;
-  accAngle_z  =  atan2(-Ay,Ax)*180/PI;
+  accAngle_x  =  atan2(AxR,  sqrt(AyR*AyR  +  AzR*AzR))*180/PI;
+  accAngle_y  =  atan2(AyR,  sqrt(AxR*AxR  +  AzR*AzR))*180/PI;
+  accAngle_z  =  atan2(-AyR,AxR)*180/PI;
   // Implement complementary filter
-  angle_x   =   (1-alpha)*(angle_x+(Gx-prevGyro_x)*dt/1000)   +   (alpha)*accAngle_x;
-  prevGyro_x = Gx;
-  angle_y   =   (1-alpha)*(angle_y+(Gy-prevGyro_y)*dt/1000)   +   (alpha)*accAngle_y;
-  prevGyro_y = Gy;
-  getAzimuth();
+  angle_x   =   (1-alpha)*(angle_x+(GxR-prevGyro_x)*dt/1000)   +   (alpha)*accAngle_x;
+  prevGyro_x = GxR;
+  angle_y   =   (1-alpha)*(angle_y+(GyR-prevGyro_y)*dt/1000)   +   (alpha)*accAngle_y;
+  prevGyro_y = GyR;
   angle_z  =  Yaw;
-  delay(20);
+  delay(2);
+  dt=millis();
+  //serial transmission
+  Serial.print(angle_x);
+  Serial.print("\t");
+  Serial.println(angle_y);
+
+
+  getDataL();
+  dt  =  millis()-dt;
+  accAngle_x  =  atan2(AxL,  sqrt(AyL*AyL  +  AzL*AzL))*180/PI;
+  accAngle_y  =  atan2(AyL,  sqrt(AxL*AxL  +  AzL*AzL))*180/PI;
+  accAngle_z  =  atan2(-AyL,AxL)*180/PI;
+  // Implement complementary filter
+  angle_x   =   (1-alpha)*(angle_x+(GxL-prevGyro_x)*dt/1000)   +   (alpha)*accAngle_x;
+  prevGyro_x = GxL;
+  angle_y   =   (1-alpha)*(angle_y+(GyL-prevGyro_y)*dt/1000)   +   (alpha)*accAngle_y;
+  prevGyro_y = GyL;
+  angle_z  =  Yaw;
+  delay(2);
   dt=millis();
   //serial transmission
   Serial.print(angle_x);
   Serial.print("\t");
   Serial.println(angle_y);
 }
-
-void getAzimuth()
-{
-  //this part is required to normalize the magnetic vector
-  //get Min  and  Max  Reading  for Magnetic  Axis
-  if (mx>mxMax) {
-    mxMax = mx; 
-    getOffset(); 
-  }
-  if (my>myMax) {
-    myMax = my; 
-    getOffset(); 
-  }
-  if (mz>mzMax) {
-    mzMax = mz; 
-    getOffset(); 
-  }
-
-  if (mx<mxMin) {
-    mxMin = mx; 
-    getOffset();
-  }
-  if (my<myMin) {
-    myMin = my; 
-    getOffset();
-  }
-  if (mz<mzMin) {
-    mzMin = mz; 
-    getOffset();
-  }
-
-  //Map the incoming Data from -1 to 1
-  mxMap  =  float(map(mx,  mxMin,  mxMax,  -1000,  1000))/1000.0;
-  myMap  =  float(map(my,  myMin,  myMax,  -1000,  1000))/1000.0;
-  mzMap  =  float(map(mz,  mzMin,  mzMax,  -1000,  1000))/1000.0;
-  //normalize  the  magnetic  vector
-
-  float norm= sqrt( sq(mxMap) + sq(myMap) + sq(mzMap));
-  mxMap /=norm;
-  myMap /=norm;
-  mzMap /=norm;
-  yawRaw=atan2( (myMap*cos(angle_x) + mzMap*sin(angle_x) ) , (mxMap*cos(angle_y) + myMap*sin (angle_y)*sin(angle_x)  - mzMap*sin(angle_y)*cos(angle_x))  ) *180/PI;
-  YawU=atan2(-myMap, mxMap) *180/PI;
-  // Change yaw range to 0-360 form -180 - 180
-  if(YawU<0) {
-    YawU+=360.00; 
-  }
-  //	Apply  Low  Pass  Filter to Yaw  to remove  any  high-frequency  magnetic  noise
-  Yaw=  yawFilteredOld  +  0.8*  (YawU  - yawFilteredOld);
-  yawFilteredOld=Yaw;
-}
-
-
 
