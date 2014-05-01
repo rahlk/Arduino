@@ -64,7 +64,7 @@ float angle_y = 0.00;
 float accAngle_x =0.00;
 float accAngle_y =0.00;
 float accAngle_z =0.00;
-
+unsigned int timer=0;
 #define  address  0x1E  //0011110b,  I2C  7bit  address  of  HMC5883
 
 void setup() {
@@ -75,12 +75,14 @@ void setup() {
   flag=1;
   // initialize device
   accelgyro.initialize();
+  accelgyro1.initialize();
   // verify connection
   getOffsetR();
   getOffsetL();
 }
 void loop() {
   getAngle();
+  timer=timer+1;
   delay(10);
 }
 
@@ -126,16 +128,16 @@ void getOffsetL() {
 void getDataL() {
  accelgyro.getMotion6(&axL, &ayL, &azL, &gxL, &gyL, &gzL); // Left
   // LEFT
-  GxL=((gx-gxOffL)/16.40);
-  GyL=((gy-gyOffL)/16.40);
-  GzL=((gz-gzOffL)/16.40);
-  AxL=((ax-axOffL)/2048.00);
-  AyL=((ay-ayOffL)/2048.00);
-  AzL=((az-azOffL)/2048.00)+1;	// Az=Ay;	Ay=Az
+  GxL=((gxL-gxOffL)/16.40);
+  GyL=((gyL-gyOffL)/16.40);
+  GzL=((gzL-gzOffL)/16.40);
+  AxL=((axL-axOffL)/2048.00);
+  AyL=((ayL-ayOffL)/2048.00);
+  AzL=((azL-azOffL)/2048.00)+1;	// Az=Ay;	Ay=Az
   unsigned int time=millis();
   Serial.print("L");
   Serial.print("\t");
-  Serial.print(time);
+  Serial.print(timer);
   Serial.print("\t");
   Serial.print(AxL);
   Serial.print("\t");
@@ -154,16 +156,16 @@ void getDataL() {
   void getDataR() {
   accelgyro1.getMotion6(&axR, &ayR, &azR, &gxR, &gyR, &gzR);  // Right
   // RIGHT
-  GxR=((gx-gxOffR)/16.40);
-  GyR=((gy-gyOffR)/16.40);
-  GzR=((gz-gzOffR)/16.40);
-  AxR=((ax-axOffR)/2048.00);
-  AyR=((ay-ayOffR)/2048.00);
-  AzR=((az-azOffR)/2048.00)+1;	// Az=Ay;	Ay=Az
+  GxR=((gxR-gxOffR)/16.40);
+  GyR=((gyR-gyOffR)/16.40);
+  GzR=((gzR-gzOffR)/16.40);
+  AxR=((axR-axOffR)/2048.00);
+  AyR=((ayR-ayOffR)/2048.00);
+  AzR=((azR-azOffR)/2048.00)+1;	// Az=Ay;	Ay=Az
   unsigned int time=millis();
   Serial.print("R");
   Serial.print("\t");
-  Serial.print(time);
+  Serial.print(timer);
   Serial.print("\t");
   Serial.print(AxR);
   Serial.print("\t");
@@ -191,7 +193,7 @@ void getAngle() {
   angle_y   =   (1-alpha)*(angle_y+(GyR-prevGyro_y)*dt/1000)   +   (alpha)*accAngle_y;
   prevGyro_y = GyR;
   angle_z  =  Yaw;
-  delay(2);
+  delay(10);
   dt=millis();
   //serial transmission
   Serial.print(angle_x);
@@ -210,7 +212,7 @@ void getAngle() {
   angle_y   =   (1-alpha)*(angle_y+(GyL-prevGyro_y)*dt/1000)   +   (alpha)*accAngle_y;
   prevGyro_y = GyL;
   angle_z  =  Yaw;
-  delay(2);
+  delay(10);
   dt=millis();
   //serial transmission
   Serial.print(angle_x);
