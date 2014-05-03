@@ -51,6 +51,8 @@ float dt = 0.00;
 float  alphaYaw  =  0.2;
 float prevGyro_x = 0.00;
 float prevGyro_y = 0.00;
+float prevGyro_x_L = 0.00;
+float prevGyro_y_L = 0.00;
 float prevGyro_z = 0.00;
 float prevGyro_z_2 = 0.00;
 float prevGyro_z_3 = 0.00;
@@ -207,10 +209,10 @@ void getAngle() {
   accAngle_y  =  atan2(AyL,  sqrt(AxL*AxL  +  AzL*AzL))*180/PI;
   accAngle_z  =  atan2(-AyL,AxL)*180/PI;
   // Implement complementary filter
-  angle_x   =   (1-alpha)*(angle_x+(GxL-prevGyro_x)*dt/1000)   +   (alpha)*accAngle_x;
-  prevGyro_x = GxL;
-  angle_y   =   (1-alpha)*(angle_y+(GyL-prevGyro_y)*dt/1000)   +   (alpha)*accAngle_y;
-  prevGyro_y = GyL;
+  angle_x   =   (1-alpha)*(angle_x+(GxL-prevGyro_x_L)*dt/1000)   +   (alpha)*accAngle_x;
+  prevGyro_x_L = GxL;
+  angle_y   =   (1-alpha)*(angle_y+(GyL-prevGyro_y_L)*dt/1000)   +   (alpha)*accAngle_y;
+  prevGyro_y_L = GyL;
   angle_z  =  Yaw;
   delay(10);
   dt=millis();
