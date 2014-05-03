@@ -209,16 +209,16 @@ void getAngle() {
   accAngle_y  =  atan2(AyL,  sqrt(AxL*AxL  +  AzL*AzL))*180/PI;
   accAngle_z  =  atan2(-AyL,AxL)*180/PI;
   // Implement complementary filter
-  angle_x   =   (1-alpha)*(angle_x+(GxL-prevGyro_x_L)*dt/1000)   +   (alpha)*accAngle_x;
+  angle_x_L   =   (1-alpha)*(angle_x_L+(GxL-prevGyro_x_L)*dt/1000)   +   (alpha)*accAngle_x;
   prevGyro_x_L = GxL;
-  angle_y   =   (1-alpha)*(angle_y+(GyL-prevGyro_y_L)*dt/1000)   +   (alpha)*accAngle_y;
+  angle_y_L   =   (1-alpha)*(angle_y_L+(GyL-prevGyro_y_L)*dt/1000)   +   (alpha)*accAngle_y;
   prevGyro_y_L = GyL;
   angle_z  =  Yaw;
   delay(10);
   dt=millis();
   //serial transmission
-  Serial.print(angle_x);
+  Serial.print(angle_x_L);
   Serial.print("\t");
-  Serial.println(angle_y);
+  Serial.println(angle_y_L);
 }
 
